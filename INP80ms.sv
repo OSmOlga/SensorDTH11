@@ -1,5 +1,4 @@
 `timescale 1ns / 1ps
-//`include "INP80ms"
 //////////////////////////////////////////////////////////////////////////////////
 // Company: 
 // Engineer: 
@@ -21,24 +20,27 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module DHT_controller(clk, rst, signal, en_set, data);
+module INP80ms(clk, rst, signal);
 
-input logic clk, rst, signal, en_set;
-inout logic data;
+input logic clk; 
+input logic rst;
+output logic signal;
 
-logic data_buf;
-
-//INP80ms uut (.clk(clk), .rst(rst), .signal(signal));
+logic [20:0] cnt;
+logic signal_cnt;
 
 always_ff @(posedge clk)
     begin
         if (rst)
-                data_buf <= '0;
-        if (en_set)
-                data_buf <= data;
-        else
-                data_buf <= signal;
-    end
- assign data = (en_set)? 'bz : data_buf;
-          
+            begin
+                cnt <= 21'd0;
+                signal_cnt <= 1'd0;
+            end            
+        else 
+            cnt <= cnt + 21'd1;
+        if (cnt == 21'd1800000)
+            signal_cnt <= 1'd1;
+     end
+    
+assign signal = signal_cnt;
 endmodule
