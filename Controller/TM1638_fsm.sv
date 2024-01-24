@@ -24,14 +24,13 @@ module TM1638_fsm(clk, rst, clk1, dio, stb);
 
 input logic clk, rst;
 
-(* mark_debug = "true" *)output logic stb;
-(* mark_debug = "true" *)output logic dio;
-(* mark_debug = "true" *)output logic clk1;
+(*mark_debug = "true"*)output logic stb;
+(*mark_debug = "true"*)output logic dio;
+(*mark_debug = "true"*)output logic clk1;
 
 logic [7:0] cnt;
 logic clk_2u;
 logic rst_2u;
-logic rst1;
 logic [2:0] tmp;
 
 always_ff @(posedge clk)
@@ -42,20 +41,17 @@ always_ff @(posedge clk)
                 clk_2u <= 1'd0;
                 rst_2u <= 1'd1;
                 tmp <= 3'd0;
-                rst1 <= 1'd1;
             end
         else
                 cnt <= cnt + 8'd1;
-        if (cnt == 8'd199)
+        if (cnt == 8'd99)
             begin
                 clk_2u <= ~clk_2u;
                 cnt <= 8'd0;
                 tmp <= tmp + 3'd1;
             end
         if (tmp == 3'd2)
-            rst_2u <= 1'd0;
-        if (tmp == 3'd7)
-            rst1 <= 1'd0;     
+            rst_2u <= 1'd0;    
     end
 
 logic [15:0] i;
@@ -171,9 +167,11 @@ always_ff @(posedge clk_2u)
 logic [7:0] index;
 
 localparam [7:0]
-cmd1 = 8'b0100_0000,
-cmd2 = 8'b1100_0000,
-cmd3 = 8'b1000_1111;
+cmd1 = 8'b0000_0010,
+cmd3 = 8'b1111_0001;
+
+localparam [0:7]
+cmd2 = 8'b0000_0011;
 
 logic [0:7] data1 = 8'b1001_1100;
 logic [0:7] data2 = 8'b0111_0110;
@@ -181,46 +179,22 @@ logic [0:7] data3 = 8'b0110_1110;
 logic [0:7] data4 = 8'b1110_1111;
 
 logic [0:127] data_buff = {data1, 8'b0, data2, 8'b1111_1111, data3, 8'b0, data4, 8'b1111_1111, data1, 8'b0, data2, 8'b1111_1111, data3, 8'b0, data4, 8'b1111_1111};
+logic [0:151] data_buff1 = {cmd1, cmd2, data_buff, cmd3};
 
 always_ff @(negedge clk1 or posedge rst)
-    if (rst)
-        begin
-            dio <= 1'd0;
-            index <= 8'd0;
-        end
-    else
-        begin
-        case(state)
-            Set_cmd1:
-                begin
-                                        dio <= cmd1[index];
-                                        index <= index + 8'd1;
-                    if (index == 8'd7)
-                                        index <= 8'd0;
-                end
-            Set_cmd2:
-                begin
-                                        dio <= cmd2[index];
-                                        index <= index + 8'd1;
-                    if (index == 8'd7)
-                                        index <= 8'd0;
-                end
-            Set_cmd3:
-                begin
-                                        dio <= cmd3[index];
-                                        index <= index + 8'd1;
-                    if (index == 8'd7)
-                                        index <= 8'd0;
-                end
-            Set_data:
-                begin
-                                        dio <= data_buff[index];
-                                        index <= index + 8'd1;
-                    if (index == 8'd127)
-                                        index <= 8'd0;
-                end
-        endcase
-        end
+        if (rst)
+            begin
+                                                    dio <= 1'd0;
+                                                    index <= 8'd0;
+            end
+        else
+            begin
+                                                     dio <= data_buff1[index];
+                                                     index <= index + 8'd1;
+              if (index == 8'd151)
+                                                     index <= 8'd0;                        
+            end
+    
 
 //state update
 always_ff @(posedge clk_2u)
