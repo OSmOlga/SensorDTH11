@@ -20,13 +20,14 @@
 //////////////////////////////////////////////////////////////////////////////////
 
 
-module TM1638_fsm(clk, rst, clk1, dio, stb);
+module TM1638_fsm(clk, rst, clk1, dio, stb, temp1, temp2, hum1, hum2);
 
 input logic clk, rst;
+input logic [7:0] temp1, temp2, hum1, hum2;
 
-(*mark_debug = "true"*)output logic stb;
-(*mark_debug = "true"*)output logic dio;
-(*mark_debug = "true"*)output logic clk1;
+output logic stb;
+output logic dio;
+output logic clk1;
 
 logic [7:0] cnt;
 logic clk_2u;
@@ -79,8 +80,8 @@ always_ff @(posedge clk_2u)
                 if (p == 3'd3)        new_state <= Set_cmd3;
             Set_cmd3:
                 if (p == 3'd4)         new_state <= Done;
-//            Done:
-//                if (p == 3'd5)          new_state <= Init;
+            Done:
+                if (p == 3'd5)          new_state <= Init;
          
         endcase
     end
@@ -165,7 +166,17 @@ always_ff @(posedge clk_2u)
         endcase
     end
 logic [7:0] index;
+logic tmp_d;
 
+always_ff @(posedge clk_2u or posedge rst)
+    if (rst)
+        tmp_d <= 1'd0;
+    else
+        if(p == 3'd5)
+            tmp_d <= 1'd1;
+        else tmp_d <= 1'd0;
+    
+    
 localparam [7:0]
 cmd1 = 8'b0000_0010,
 cmd3 = 8'b1111_0001;
@@ -173,14 +184,14 @@ cmd3 = 8'b1111_0001;
 localparam [0:7]
 cmd2 = 8'b0000_0011;
 
-logic [0:7] data1 = 8'b1001_1100;
-logic [0:7] data2 = 8'b0111_0110;
-logic [0:7] data3 = 8'b0110_1110;
-logic [0:7] data4 = 8'b1110_1111;
+logic [0:7] data_t = 8'b0001_1110;
+logic [0:7] data = 8'b0001_0000;
+logic [0:7] data_h = 8'b0010_1110;
 
-logic [0:127] data_buff = {data1, 8'b0, data2, 8'b1111_1111, data3, 8'b0, data4, 8'b1111_1111, data1, 8'b0, data2, 8'b1111_1111, data3, 8'b0, data4, 8'b1111_1111};
-logic [0:151] data_buff1 = {cmd1, cmd2, data_buff, cmd3};
-
+logic [0:151] data_buff;
+always_ff @(posedge tmp_d)
+    data_buff <= {cmd1, cmd2, data_t, 8'b0, data, {8{1'b1}}, temp1, 8'b0, temp2, {8{1'b1}}, data_h, 8'b0, data, {8{1'b1}}, hum1, 8'b0, hum2, {8{1'b1}}, cmd3};
+    
 always_ff @(negedge clk1 or posedge rst)
         if (rst)
             begin
@@ -189,7 +200,7 @@ always_ff @(negedge clk1 or posedge rst)
             end
         else
             begin
-                                                     dio <= data_buff1[index];
+                                                     dio <= data_buff[index];
                                                      index <= index + 8'd1;
               if (index == 8'd151)
                                                      index <= 8'd0;                        
