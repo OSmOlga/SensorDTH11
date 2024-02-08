@@ -27,7 +27,7 @@ output logic [7:0] out;
 always_ff @(in)
     case (in)
         4'd0: out <= 8'b1111_1100;
-        4'd1: out <= 8'b1100_0000;
+        4'd1: out <= 8'b0110_0000;
         4'd2: out <= 8'b1101_1010;
         4'd3: out <= 8'b1111_0010;
         4'd4: out <= 8'b0110_0110;

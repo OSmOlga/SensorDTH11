@@ -23,8 +23,9 @@
 module TM1638_fsm_TB;
 
 logic clk, rst, dio, stb, clk1;
- 
-TM1638_fsm uut (.clk(clk), .rst(rst), .clk1(clk1), .dio(dio), .stb(stb));
+logic [7:0] temp1, temp2, hum1, hum2; 
+
+TM1638_fsm uut ( .clk(clk), .rst(rst), .clk1(clk1), .dio(dio), .stb(stb), .temp1(temp1), .temp2(temp2), .hum1(hum1), .hum2(hum2));
 
 initial
     begin
@@ -40,4 +41,11 @@ initial
         repeat(2) @(posedge clk);
         rst <= 1'd0;
     end
+    
+initial begin
+        temp1 = 8'b1111_0010;
+        temp2 = 8'b1101_1010;
+        hum1 = 8'b1111_0010;
+        hum2 = 8'b1101_1010;       
+end
 endmodule

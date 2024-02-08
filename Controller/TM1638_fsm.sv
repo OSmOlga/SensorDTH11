@@ -45,7 +45,7 @@ always_ff @(posedge clk)
             end
         else
                 cnt <= cnt + 8'd1;
-        if (cnt == 8'd99)
+        if (cnt == 8'd199)
             begin
                 clk_2u <= ~clk_2u;
                 cnt <= 8'd0;
@@ -156,7 +156,7 @@ always_ff @(posedge clk_2u)
                 begin
                                                     i <= i + 16'd1;
                                                     stb <= 1'd1;
-                    if (i == 16'd5)
+                    if (i == 16'd65534)
                         begin
                                                     i <= 16'd0;
                                                     p <= 3'd5;
@@ -189,9 +189,20 @@ logic [0:7] data = 8'b0001_0000;
 logic [0:7] data_h = 8'b0010_1110;
 
 logic [0:151] data_buff;
-always_ff @(posedge tmp_d)
-    data_buff <= {cmd1, cmd2, data_t, 8'b0, data, {8{1'b1}}, temp1, 8'b0, temp2, {8{1'b1}}, data_h, 8'b0, data, {8{1'b1}}, hum1, 8'b0, hum2, {8{1'b1}}, cmd3};
-    
+logic [7:0] d_s;
+
+always_ff @(posedge tmp_d or posedge rst)
+    if (rst)
+        begin
+            d_s <= 8'd1;
+            data_buff <= 152'd0;
+        end
+    else
+        begin
+            d_s <= {d_s[6:0], d_s[7]};
+            data_buff <= {cmd1, cmd2, data_t, {8{d_s[0]}}, data, {8{d_s[1]}}, temp1, {8{d_s[2]}}, temp2, {8{d_s[3]}}, data_h, {8{d_s[4]}}, data, {8{d_s[5]}}, hum1, {8{d_s[6]}}, hum2, {8{d_s[7]}}, cmd3};
+        end  
+  
 always_ff @(negedge clk1 or posedge rst)
         if (rst)
             begin

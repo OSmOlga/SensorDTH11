@@ -21,7 +21,6 @@
 
 
 module top(clk, rst, data, en_set, stb, dio, clk1);
-//module top(clk, rst, data, en_set, temp, hum, temp_ss, hum_ss, clk1, stb, dio, temp1, temp2, hum1, hum2);
 
 input logic clk, rst;
 inout logic data;

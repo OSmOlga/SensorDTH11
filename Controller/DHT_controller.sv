@@ -56,22 +56,22 @@ always_ff @(posedge clk)
             end
         else
                         cnt_1m <= cnt_1m + 16'd1;
-//3 sec counter
-logic [12:0] cnt_signal;
+//2 sec counter
+logic [8:0] cnt_signal;
 
 always_ff @(posedge clk_1m or posedge rst)
     if (rst)
         begin
                         signal <= 1'd1;
-                        cnt_signal <= 13'd0;
+                        cnt_signal <= 9'd0;
         end
     else
         begin
-                        cnt_signal <= cnt_signal + 13'd1;
-            if (cnt_signal == 13'd2)
+                        cnt_signal <= cnt_signal + 9'd1;
+            if (cnt_signal == 9'd2)
                         signal <= 1'd0;
             else
-                if (cnt_signal == 13'd22)
+                if (cnt_signal == 9'd22)
                         signal <= 1'd1;
 //                else
 //                    if (cnt_signal == 13'd3222)
